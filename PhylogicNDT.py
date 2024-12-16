@@ -9,18 +9,33 @@ import logging
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/")
-
-# Remove all handlers associated with the root logger object.
+# Remove all handlers associated with the root logger object
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'phylogicndt.log')
-print(filename)
-logging.basicConfig(filename=filename,
-                    filemode='w',
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S',
-                    level=getattr(logging, "INFO"))
+
+# Use environment variable for log path or default to the current directory
+log_dir = os.getenv("PHYLOGICNDT_LOG_DIR", os.getcwd())
+
+# Fallback to a temporary directory if the specified directory is not writable
+if not os.access(log_dir, os.W_OK):
+    log_dir = tempfile.gettempdir()
+
+# Define the log file path
+log_file = os.path.join(log_dir, 'phylogicndt.log')
+
+print(f"Logging to: {log_file}")
+
+# Configure logging
+logging.basicConfig(
+    filename=log_file,
+    filemode='w',
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%d-%b-%y %H:%M:%S',
+    level=logging.INFO
+)
+
+# Example info log to confirm
+logging.info("Logging setup complete.")
 
 import Cluster.Cluster  # Cluster Tool
 import PhylogicSim.Simulations
